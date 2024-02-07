@@ -13,7 +13,7 @@ const hotelColl = "hotels"
 
 type HotelStore interface {
 	InsertHotel(context.Context, *types.Hotel) (*types.Hotel, error)
-	Update(context.Context, bson.M, bson.M)
+	Update(context.Context, bson.M, bson.M) error
 }
 
 type MongoHotelStore struct {
@@ -21,10 +21,10 @@ type MongoHotelStore struct {
 	coll   *mongo.Collection
 }
 
-func NewMongHotelStore(client *mongo.Client, dbname string) *MongoHotelStore {
+func NewMongHotelStore(client *mongo.Client) *MongoHotelStore {
 	return &MongoHotelStore{
 		client: client,
-		coll:   client.Database(dbname).Collection(hotelColl),
+		coll:   client.Database(DBNAME).Collection(hotelColl),
 	}
 }
 
