@@ -22,6 +22,7 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 	}
 }
 
+// User sign up
 func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 	var params types.CreateUserParams
 	if err := c.BodyParser(&params); err != nil {

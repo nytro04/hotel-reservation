@@ -47,6 +47,7 @@ func invalidCredentials(c *fiber.Ctx) error {
 	})
 }
 
+// User sign in
 func (h *AuthHandler) HandleAuth(c *fiber.Ctx) error {
 	var params AuthParams
 	if err := c.BodyParser(&params); err != nil {
