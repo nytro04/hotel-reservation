@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -58,6 +59,17 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 		})
 	}
 
+	ok, err = h.isRoomAvailableForBooking(c.Context(), roomOID, params)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return c.Status(http.StatusBadRequest).JSON(genericResp{
+			Type: "error",
+			Msg:  fmt.Sprintf("room %s already booked", roomID),
+		})
+	}
+
 	booking := types.Booking{
 		UserID:     user.ID,
 		RoomID:     roomOID,
@@ -66,31 +78,31 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 		NumPersons: params.NumPersons,
 	}
 
-	where := bson.M{
-		"fromDate": bson.M{
-			"$gte": params.FromDate,
-		},
-		"tillDate": bson.M{
-			"$gte": params.TillDate,
-		},
-	}
-
-	bookings, err := h.store.Booking.GetBookings(c.Context(), where)
-	if err != nil {
-		return err
-	}
-
-	if len(bookings) > 0 {
-		return c.Status(http.StatusBadRequest).JSON(genericResp{
-			Type: "error",
-			Msg:  fmt.Sprintf("room %s already booked", roomID),
-		})
-	}
-
 	inserted, err := h.store.Booking.InsertBooking(c.Context(), &booking)
 	if err != nil {
 		return err
 	}
 
 	return c.JSON(inserted)
+}
+
+func (h *RoomHandler) isRoomAvailableForBooking(ctx context.Context, roomOID primitive.ObjectID, params BookRoomParams) (bool, error) {
+	where := bson.M{
+		"roomID": roomOID,
+		"fromDate": bson.M{
+			"$gte": params.FromDate,
+		},
+		"tillDate": bson.M{
+			"$lte": params.TillDate,
+		},
+	}
+
+	bookings, err := h.store.Booking.GetBookings(ctx, where)
+	if err != nil {
+		return false, err
+	}
+
+	ok := len(bookings) == 0
+	return ok, nil
+
 }
