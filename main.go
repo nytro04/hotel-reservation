@@ -69,6 +69,7 @@ func main() {
 
 	// Room handlers
 	apiV1.Post("/room/:id/book", roomHandler.HandleBookRoom)
+	apiV1.Get("/room", roomHandler.HandleGetRooms)
 
 	app.Listen(*listenAddr)
 }
