@@ -83,7 +83,7 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 		UserID:     user.ID,
 		RoomID:     roomOID,
 		FromDate:   params.FromDate,
-		TillDate:   params.FromDate,
+		TillDate:   params.TillDate,
 		NumPersons: params.NumPersons,
 	}
 
