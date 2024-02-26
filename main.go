@@ -76,6 +76,9 @@ func main() {
 	// user handler
 	apiV1.Get("/booking/:id", bookingHandler.HandleGetBooking)
 
+	// this works, but i will prefer to send a PATCH request with cancel params set to true instead of a get
+	apiV1.Get("/booking/:id/cancel", bookingHandler.HandleCancelBooking)
+
 	// admin handler
 	adminApi.Get("/booking", bookingHandler.HandleGetBookings)
 

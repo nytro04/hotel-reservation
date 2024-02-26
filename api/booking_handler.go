@@ -5,7 +5,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/nytro04/hotel-reservation/db"
-	"github.com/nytro04/hotel-reservation/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -17,6 +16,36 @@ func NewBookingHandler(store *db.Store) *BookingHandler {
 	return &BookingHandler{
 		store: store,
 	}
+}
+
+// this works, but i will prefer to send a PATCH request with cancel params set to true instead of a get
+func (h *BookingHandler) HandleCancelBooking(c *fiber.Ctx) error {
+	id := c.Params("id")
+	booking, err := h.store.Booking.GetBookingByID(c.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	user, err := getAuthUser(c)
+	if err != nil {
+		return err
+	}
+
+	if booking.UserID != user.ID {
+		return c.Status(http.StatusUnauthorized).JSON(genericResp{
+			Type: "error",
+			Msg:  "not authorized",
+		})
+	}
+
+	if err := h.store.Booking.UpdateBooking(c.Context(), id, bson.M{"canceled": true}); err != nil {
+		return err
+	}
+
+	return c.JSON(genericResp{
+		Type: "Msg",
+		Msg:  "updated",
+	})
 }
 
 // TODO: This needs to be Admin authorized. admin get all bookings
@@ -36,8 +65,8 @@ func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
 		return err
 	}
 
-	user, ok := c.Context().UserValue("user").(*types.User)
-	if !ok {
+	user, err := getAuthUser(c)
+	if err != nil {
 		return err
 	}
 
