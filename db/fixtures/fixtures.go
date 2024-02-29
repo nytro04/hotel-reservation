@@ -68,8 +68,8 @@ func AddUser(store *db.Store, fn, ln string, admin bool) *types.User {
 		Email:     fmt.Sprintf("%s@%s.com", fn, ln),
 		FirstName: fn,
 		LastName:  ln,
-		Password:  fmt.Sprintf("%s_%s", fn, ln), // to generate password
-		// Password: "P@ssw0rd",
+		// Password:  fmt.Sprintf("%s_%s", fn, ln), // to generate password
+		Password: "P@ssw0rd",
 	})
 	if err != nil {
 		log.Fatal(err)

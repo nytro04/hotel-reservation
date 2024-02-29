@@ -39,7 +39,7 @@ func (h *HotelHandler) HandleGetHotelByID(c *fiber.Ctx) error {
 
 	hotel, err := h.store.Hotel.GetHotelByID(c.Context(), id)
 	if err != nil {
-		return err
+		return ErrInvalidID()
 	}
 
 	return c.JSON(hotel)

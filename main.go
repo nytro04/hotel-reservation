@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"log"
+	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/nytro04/hotel-reservation/api"
@@ -13,11 +14,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const userColl = "users"
-
 var config = fiber.Config{
 	ErrorHandler: func(c *fiber.Ctx, err error) error {
-		return c.JSON(map[string]string{"error": err.Error()})
+		if apiError, ok := err.(api.Error); ok {
+			return c.Status(apiError.Code).JSON(apiError)
+		}
+		apiError := api.NewError(http.StatusInternalServerError, err.Error())
+		return c.Status(apiError.Code).JSON(apiError)
 	},
 }
 
