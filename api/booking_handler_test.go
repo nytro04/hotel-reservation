@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/nytro04/hotel-reservation/api/middleware"
 	"github.com/nytro04/hotel-reservation/db/fixtures"
 	"github.com/nytro04/hotel-reservation/types"
 )
@@ -28,8 +27,8 @@ func TestUserGetBooking(t *testing.T) {
 		till = from.AddDate(0, 0, 5)
 
 		booking        = fixtures.AddBooking(db.Store, user.ID, room.ID, from, till)
-		app            = fiber.New()
-		route          = app.Group("/", middleware.JWTAuthentication(db.User))
+		app            = fiber.New(fiber.Config{ErrorHandler: ErrorHandler})
+		route          = app.Group("/", JWTAuthentication(db.User))
 		bookingHandler = NewBookingHandler(db.Store)
 	)
 
@@ -84,7 +83,7 @@ func TestAdminGetBookings(t *testing.T) {
 
 		booking        = fixtures.AddBooking(db.Store, user.ID, room.ID, from, till)
 		app            = fiber.New()
-		admin          = app.Group("/", middleware.JWTAuthentication(db.User), middleware.AdminAuth)
+		admin          = app.Group("/", JWTAuthentication(db.User), AdminAuth)
 		bookingHandler = NewBookingHandler(db.Store)
 	)
 
@@ -125,6 +124,6 @@ func TestAdminGetBookings(t *testing.T) {
 		t.Fatal(err)
 	}
 	if resp.StatusCode == http.StatusOK {
-		t.Fatalf("expected a non 200 status code got %d", resp.StatusCode)
+		t.Fatalf("expected status unauthorized but got %d", resp.StatusCode)
 	}
 }
