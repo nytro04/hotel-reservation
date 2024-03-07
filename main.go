@@ -4,24 +4,16 @@ import (
 	"context"
 	"flag"
 	"log"
-	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/nytro04/hotel-reservation/api"
-	"github.com/nytro04/hotel-reservation/api/middleware"
 	"github.com/nytro04/hotel-reservation/db"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var config = fiber.Config{
-	ErrorHandler: func(c *fiber.Ctx, err error) error {
-		if apiError, ok := err.(api.Error); ok {
-			return c.Status(apiError.Code).JSON(apiError)
-		}
-		apiError := api.NewError(http.StatusInternalServerError, err.Error())
-		return c.Status(apiError.Code).JSON(apiError)
-	},
+	ErrorHandler: api.ErrorHandler,
 }
 
 func main() {
@@ -52,8 +44,8 @@ func main() {
 		bookingHandler = api.NewBookingHandler(store)
 		app            = fiber.New(config)
 		authApi        = app.Group("/api")
-		apiV1          = app.Group("/api/v1", middleware.JWTAuthentication(userStore))
-		adminApi       = apiV1.Group("/admin", middleware.AdminAuth)
+		apiV1          = app.Group("/api/v1", api.JWTAuthentication(userStore))
+		adminApi       = apiV1.Group("/admin", api.AdminAuth)
 	)
 
 	// AUTH
@@ -68,7 +60,7 @@ func main() {
 
 	// HOTEL HANDLERS
 	apiV1.Get("/hotel", hotelHandler.HandleGetHotels)
-	apiV1.Get("/hotel/:id", hotelHandler.HandleGetHotelByID)
+	apiV1.Get("/hotel/:id", hotelHandler.HandleGetHotel)
 	apiV1.Get("/hotel/:id/rooms", hotelHandler.HandleGetRooms)
 
 	// Room handlers
