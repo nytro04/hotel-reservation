@@ -13,8 +13,8 @@ const hotelColl = "hotels"
 
 type HotelStore interface {
 	Insert(context.Context, *types.Hotel) (*types.Hotel, error)
-	Update(context.Context, bson.M, bson.M) error
-	GetHotels(context.Context) ([]*types.Hotel, error)
+	Update(context.Context, Map, Map) error
+	GetHotels(context.Context, Map) ([]*types.Hotel, error)
 	GetHotelByID(context.Context, string) (*types.Hotel, error)
 }
 
@@ -45,8 +45,8 @@ func (s *MongoHotelStore) GetHotelByID(ctx context.Context, id string) (*types.H
 	return &hotel, nil
 }
 
-func (s *MongoHotelStore) GetHotels(ctx context.Context) ([]*types.Hotel, error) {
-	res, err := s.coll.Find(ctx, bson.M{})
+func (s *MongoHotelStore) GetHotels(ctx context.Context, filter Map) ([]*types.Hotel, error) {
+	res, err := s.coll.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (s *MongoHotelStore) GetHotels(ctx context.Context) ([]*types.Hotel, error)
 	return hotels, err
 }
 
-func (s *MongoHotelStore) Update(ctx context.Context, filter bson.M, update bson.M) error {
+func (s *MongoHotelStore) Update(ctx context.Context, filter Map, update Map) error {
 	_, err := s.coll.UpdateOne(ctx, filter, update)
 	// if err != nil {
 	// 	return err
