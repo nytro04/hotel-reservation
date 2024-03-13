@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/nytro04/hotel-reservation/api"
 	"github.com/nytro04/hotel-reservation/db"
 	"github.com/nytro04/hotel-reservation/db/fixtures"
@@ -14,13 +16,21 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(db.DBURI))
+	if err := godotenv.Load(); err != nil {
+		log.Fatal(err)
+	}
+
+	var (
+		mongoDBEndpoint = os.Getenv("MONGO_DB_URL")
+		mongoDBName = os.Getenv("MONGO_DB_NAME")
+		ctx             = context.Background()
+	)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoDBEndpoint))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := client.Database(db.DBNAME).Drop(ctx); err != nil {
+	if err := client.Database(mongoDBName).Drop(ctx); err != nil {
 		log.Fatal(err)
 	}
 
